@@ -1,15 +1,9 @@
-#include "sort_bus_lines.h"
-#include "test_bus_lines.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_NAME_LENGTH 20
-#define MAX_DISTANCE 1000
-#define MIN_DURATION 10
-#define MAX_DURATION 100
-/**
- * TODO add documentation
-*/
+#include <assert.h>
+#include "sort_bus_lines.h"
+#include "test_bus_lines.h"
 
 // Function prototypes
 int get_number_of_lines();
@@ -55,7 +49,6 @@ int main(int argc, char* argv[]) {
     } else if (strcmp(mode, "by_duration") == 0) {
         quick_sort(lines, lines + num_lines, DURATION);
     }
-
     for (int i = 0; i < num_lines; i++) {
         printf("%s, %d, %d\n", lines[i].name, lines[i].distance, lines[i].duration);
     }
@@ -64,65 +57,43 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
-
-int get_number_of_lines()
-{
-    char* end_pointer = NULL;
-
-    while (1)
-    {
-        char buffer[64];
-        printf("Enter number of lines: ");
-        if (!fgets(buffer, sizeof(buffer), stdin))
-        {
-            printf("Error reading input. Please try again.\n");
-            continue;
-        }
-        const long num_lines = strtol(buffer, &end_pointer, 10);
-        if ((*end_pointer == '\n' || *end_pointer == '\0') && num_lines > 0)
-        {
-            return (int)num_lines;
-        }
-        printf("Invalid input. Please enter a valid number.\n");
+int get_number_of_lines() {
+    char buffer[64];
+    printf("Enter number of lines. Then enter\n");
+    if (!fgets(buffer, sizeof(buffer), stdin)) {
+        fprintf(stderr, "Error: Failed to read number of lines.\n");
+        return -1;
     }
+
+    char* endptr;
+    long num_lines = strtol(buffer, &endptr, 10);
+    if (endptr == buffer || *endptr != '\n' || num_lines <= 0) {
+        fprintf(stderr, "Error: Invalid number of lines.\n");
+        return -1;
+    }
+
+    return (int)num_lines;
 }
 
 int get_bus_line_info(BusLine* bus_line, int line_number) {
-    while (1) {
-        char buffer[64];
-        printf("Enter bus line info (name, distance, duration): ");
-        if (!fgets(buffer, sizeof(buffer), stdin)) {
-            printf("Error reading input. Please try again.\n");
-            continue;
-        }
-
-        char name[MAX_NAME_LENGTH + 1];
-        int distance, duration;
-        if (sscanf(buffer, " %20[^,],%d,%d", name, &distance, &duration) != 3) {
-            printf("Error: Invalid input format. Expected: name,distance,duration.\n");
-            continue;
-        }
-
-        for (int i = 0; name[i] != '\0'; i++) {
-            if (!((name[i] >= 'a' && name[i] <= 'z') || (name[i] >= '0' && name[i] <= '9'))) {
-                printf("Error: Name must contain only lowercase letters and digits.\n");
-                continue;
-            }
-        }
-
-        if (distance < 0 || distance > MAX_DISTANCE) {
-            printf("Error: Distance should be between 0 and %d.\n", MAX_DISTANCE);
-            continue;
-        }
-        if (duration < MIN_DURATION || duration > MAX_DURATION) {
-            printf("Error: Duration should be between %d and %d.\n", MIN_DURATION, MAX_DURATION);
-            continue;
-        }
-
-        strncpy(bus_line[line_number].name, name, MAX_NAME_LENGTH);
-        bus_line[line_number].name[MAX_NAME_LENGTH] = '\0';
-        bus_line[line_number].distance = distance;
-        bus_line[line_number].duration = duration;
-        return 1; // Success
+    char buffer[64];
+    printf("Enter line info. Then enter\n");
+    if (!fgets(buffer, sizeof(buffer), stdin)) {
+        fprintf(stderr, "Error: Failed to read line info.\n");
+        return 0;
     }
+
+    char name[21];
+    int distance, duration;
+    if (sscanf(buffer, "%20[^,],%d,%d", name, &distance, &duration) != 3) {
+        fprintf(stderr, "Error: Invalid line format. Expected <name>,<distance>,<duration>.\n");
+        return 0;
+    }
+
+    strncpy(bus_line[line_number].name, name, sizeof(bus_line[line_number].name) - 1);
+    bus_line[line_number].name[sizeof(bus_line[line_number].name) - 1] = '\0';
+    bus_line[line_number].distance = distance;
+    bus_line[line_number].duration = duration;
+
+    return 1;
 }
