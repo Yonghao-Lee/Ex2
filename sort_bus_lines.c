@@ -39,9 +39,7 @@ void quick_sort(BusLine *start, BusLine *end, SortType sort_type) {
 }
 void bubble_sort(BusLine *start, BusLine *end) {
     BusLine *i, *j;
-    bool swapped;
-    int n = end - start;
-
+    bool swapped = false;
     for (i = start; i < end - 1; i++) {
         swapped = false;
         for (j = start; j < end - 1 - (i - start); j++) {
