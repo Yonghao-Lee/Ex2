@@ -8,71 +8,53 @@
 /**
  * TODO add documentation
 */
+
+// Function prototypes
 int get_number_of_lines();
 int get_bus_line_info(BusLine* bus_line, int line_number);
 
-int main(int argc, char* argv[])
-{
-    char mode[20];
-    while (1)
-    {
-        if (argc != 2)
-        {
-            printf("Enter mode (by_name, by_distance, by_duration, test): ");
-            if (!fgets(mode, 20, stdin))
-            {
-                fprintf(stderr, "Error reading mode. Exiting.\n");
-                return EXIT_FAILURE;
-            }
-            mode[strcspn(mode, "\n")] = '\0'; //removing the new line char
-        }
-        else
-        {
-            strcpy(mode, argv[1]);
-        }
-        if (strcmp(mode, "test") == 0 || strcmp(mode, "by_name") == 0 ||
-            strcmp(mode, "by_distance") == 0 || strcmp(mode, "by_duration") == 0)
-        {
-            break;
-        }
-        printf("Invalid mode: %s\n", mode);
-        argc = 1; // Reset argc to get repeated input
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <mode>\n", argv[0]);
+        return EXIT_FAILURE;
     }
-    if (strcmp(mode, "test") == 0)
-    {
+
+    const char* mode = argv[1];
+    if (strcmp(mode, "test") != 0 && strcmp(mode, "by_name") != 0 &&
+        strcmp(mode, "by_distance") != 0 && strcmp(mode, "by_duration") != 0) {
+        fprintf(stderr, "Invalid mode: %s\n", mode);
+        return EXIT_FAILURE;
+        }
+
+    if (strcmp(mode, "test") == 0) {
         run_test();
         return EXIT_SUCCESS;
     }
+
     int num_lines = get_number_of_lines();
     BusLine* lines = calloc(num_lines, sizeof(BusLine));
-    if (lines == NULL)
-    {
-        fprintf(stderr, "Error allocating memory for lines.\n");
+    if (!lines) {
+        fprintf(stderr, "Error: Memory allocation failed.\n");
         return EXIT_FAILURE;
     }
-    for (int i = 0; i < num_lines; i++)
-    {
-        if (!get_bus_line_info(lines, i))
-        {
-            i--; // Retry the current line if input was invalid
+
+    for (int i = 0; i < num_lines; i++) {
+        if (!get_bus_line_info(lines, i)) {
+            fprintf(stderr, "Error: Failed to get line info for line %d.\n", i);
+            free(lines);
+            return EXIT_FAILURE;
         }
     }
-    if (strcmp(mode, "by_name") == 0)
-    {
+
+    if (strcmp(mode, "by_name") == 0) {
         bubble_sort(lines, lines + num_lines);
-    }
-    else if (strcmp(mode, "by_distance") == 0)
-    {
+    } else if (strcmp(mode, "by_distance") == 0) {
         quick_sort(lines, lines + num_lines, DISTANCE);
-    }
-    else if (strcmp(mode, "by_duration") == 0)
-    {
+    } else if (strcmp(mode, "by_duration") == 0) {
         quick_sort(lines, lines + num_lines, DURATION);
     }
 
-    printf("Sorted bus lines:\n");
-    for (int i = 0; i < num_lines; i++)
-    {
+    for (int i = 0; i < num_lines; i++) {
         printf("%s, %d, %d\n", lines[i].name, lines[i].distance, lines[i].duration);
     }
 
