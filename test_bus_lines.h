@@ -23,7 +23,7 @@ int is_sorted_by_name (const BusLine *start, const BusLine *end);
 /**
  * TODO add documentation
  */
-void run_test();
+void run_test(const BusLine* lines, const BusLine* end);
 int is_equal (const BusLine *start_sorted,
               const BusLine *end_sorted,
               const BusLine *start_original,
